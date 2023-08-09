@@ -31,8 +31,16 @@ An educational expedition to learn more about the game with no intention of prov
 1. Copy the following from `<patch-to-game>/Mechabellum/BepInEx/interop/` to `/referencedlls`:
 
 - Assembly-CSharp.dll
-
 - Assembly-CSharp-firstpass.dll
+- GRClient.dll
+- GRCore.dll
+- GRDebug.dll
+- GRFight.dll
+- GRServer.dll
+- GRUtility.dll
+- UnityEngine.dll
+- UnityEngine.CoreModule.dll
+- Il2Cppmscorlib.dll
 
 1. Run `/tools/build.bat` to build
 

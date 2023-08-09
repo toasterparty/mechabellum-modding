@@ -29,4 +29,49 @@
       <HintPath>..\referencedlls\Assembly-CSharp.dll</HintPath>
     </Reference>
   </ItemGroup>
+  <ItemGroup>
+    <Reference Include="gamedll">
+      <HintPath>..\referencedlls\GRClient.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="gamedll">
+      <HintPath>..\referencedlls\GRCore.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="gamedll">
+      <HintPath>..\referencedlls\GRDebug.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="gamedll">
+      <HintPath>..\referencedlls\GRFight.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="gamedll">
+      <HintPath>..\referencedlls\GRServer.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="gamedll">
+      <HintPath>..\referencedlls\GRUtility.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="gamedll">
+      <HintPath>..\referencedlls\UnityEngine.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="gamedll">
+      <HintPath>..\referencedlls\UnityEngine.CoreModule.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="gamedll">
+      <HintPath>..\referencedlls\Il2Cppmscorlib.dll</HintPath>
+    </Reference>
+  </ItemGroup>
 </Project>

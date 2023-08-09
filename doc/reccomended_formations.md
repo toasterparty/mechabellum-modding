@@ -20,3 +20,5 @@ Basically, the three formations which are most likely to result in a win out of 
 I think X is left and right, and Y is forwards/backwards.
 
 The game can take reccomendations from the internet that don't exist on file. I think the local ones are appended to ones downloaded from the internet, or this is a caching optimization.
+
+In code, the list of reccomendations is `GameRiver.Client.RecommendFormManager.dataInfo`
