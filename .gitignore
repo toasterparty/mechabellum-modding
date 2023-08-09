@@ -1,0 +1,4 @@
+*/bin/*
+*/obj/*
+dist/BepInEx*
+*/com.github.toasterparty.*.dll
