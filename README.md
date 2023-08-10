@@ -40,6 +40,8 @@ An educational expedition to learn more about the game with no intention of prov
 - GRUtility.dll
 - UnityEngine.dll
 - UnityEngine.CoreModule.dll
+- UnityEngine.InputModule.dll
+- UnityEngine.InputLegacyModule.dll
 - Il2Cppmscorlib.dll
 
 1. Run `/tools/build.bat` to build
