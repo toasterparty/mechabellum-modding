@@ -40,6 +40,7 @@ namespace MechabellumModding
 
     public class MechabellumModdingMB : MonoBehaviour
     {
+        #pragma warning disable IDE0290
         public MechabellumModdingMB(IntPtr handle) : base(handle) {}
         #pragma warning disable IDE0051
         #pragma warning disable CA1822
@@ -47,5 +48,7 @@ namespace MechabellumModding
         {
             RecommendedFormations.Update();
         }
+        #pragma warning restore IDE0051
+        #pragma warning restore CA1822
     }
 }

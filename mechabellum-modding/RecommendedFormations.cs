@@ -26,6 +26,8 @@ namespace MechabellumModding
             Harmony.CreateAndPatchAll(typeof(RecommendedFormations));
         }
 
+        private static bool PendingSelect = false;
+
         public static void Update()
         {
             if (!ModConfig.Data.customRecommendedFormations)
@@ -39,23 +41,55 @@ namespace MechabellumModding
                 FirstDeployFinished = false;
             }
 
-            if (Input.GetKeyDown(KeyCode.Keypad1) || ShouldShowRecButton())
+            if (ShouldShowRecButton())
             {
                 ShowRecButton();
             }
 
-            if (Input.GetKeyDown(KeyCode.Keypad0))
+            if (PendingSelect && formPanel != null && formPanel.ChooseRecommendFormPanel != null)
+            {
+                PendingSelect = false;
+                SelectNextForm();
+            }
+
+            if (Input.GetKeyDown(KeyCode.PageUp))
+            {
+                SelectNextForm();
+            }
+            else if (Input.GetKeyDown(KeyCode.PageDown))
+            {
+                SelectNextForm(false);
+            }
+            else if (Input.GetKeyDown(KeyCode.Insert))
             {
                 SaveCurrentForm();
             }
-
-            if (Input.GetKeyDown(KeyCode.KeypadPlus))
+            else if (Input.GetKeyDown(KeyCode.Delete))
             {
-                SelectNextForm(true);
+                DeleteCurrentForm();
             }
-            else if (Input.GetKeyDown(KeyCode.KeypadMinus))
+        }
+
+        private static void ApplyAll()
+        {
+            var currentForm = GetCurrentForm();
+            if (currentForm == null) return;
+            
+            foreach (var form in forms)
             {
-                SelectNextForm(false);
+                if (AreFormsCompatible(form.baseData, currentForm))
+                {
+                    ApplyForm(form);
+                }
+            }
+        }
+
+        private static void RefreshRecPanel()
+        {
+            if (IsFirstDeploy() && (formPanel?.ChooseRecommendFormPanel?.IsShow() ?? false))
+            {
+                formPanel.HideRecommendForm();
+                formPanel.ShowRecommendForm();
             }
         }
 
@@ -75,6 +109,11 @@ namespace MechabellumModding
         {
             MechabellumModding.Log.LogInfo("OnEnterDeploy");
             InDeploy = true;
+
+            if (IsFirstDeploy())
+            {
+                PendingSelect = true;
+            }
         }
 
         [HarmonyPatch(typeof(MatchClient), nameof(MatchClient.OnFightStart))]
@@ -245,16 +284,14 @@ namespace MechabellumModding
             }
 
             chooseFormPanel.OnClickForm(formItems[planIdx].itemBtn);
+            RefreshRecPanel();
             MechabellumModding.Log.LogWarning($"Applied plan {planIdx} id={form.id}");
         }
 
-        private static void SelectNextForm(bool direction)
+        private static void SelectNextForm(bool direction = true)
         {
             var currentForm = GetCurrentForm();
-            if (currentForm == null)
-            {
-                return;
-            }
+            if (currentForm == null) return;
 
             for (int idx = 1; idx <= forms.Count; idx++)
             {
@@ -277,13 +314,18 @@ namespace MechabellumModding
                     continue;
                 }
 
+                if (FormEq(formBase, currentForm))
+                {
+                    continue;
+                }
+
                 currentFormIdx = checkIdx;
                 ApplyForm(form);
                 SelectForm(formBase);
                 return;
             }
 
-            MechabellumModding.Log.LogInfo("No saved forms match the current");
+            MechabellumModding.Log.LogInfo("No other saved forms");
         }
 
         private static void ApplyForm(FormBase form)
@@ -308,6 +350,7 @@ namespace MechabellumModding
             }
 
             dataInfo.AddCurrentRecommend(form);
+            RefreshRecPanel();
             MechabellumModding.Log.LogInfo($"Applied form {form.Id}");
         }
 
@@ -351,37 +394,68 @@ namespace MechabellumModding
 
         private static void SaveCurrentForm()
         {
-            var manager = RecommendFormManager.Instance;
-            if (manager == null)
+            var form = GetCurrentForm();
+            if (form == null) return;
+
+            if (DuplicateForm(form))
             {
-                MechabellumModding.Log.LogWarning("Manager is null");
+                MechabellumModding.Log.LogWarning("This form is already saved");
                 return;
             }
 
-            var dataStore = manager.store;
-            if (dataStore == null)
-            {
-                MechabellumModding.Log.LogWarning("dataStore is null");
-                return;
-            }
+            idHighwater++;
+            form.name = idHighwater.ToString();
+            form.id = idHighwater;
+            form.userid = (ulong) idHighwater;
+            form.time = DateTime.Now.ToLongDateString() + ' ' + DateTime.Now.ToLongTimeString();
 
-            PlayerFormCollect form = null;
-            formManager?.TryGetCurrentForm(out form);
+            LoadCustomForm(form, true);
+            ApplyForm(form);
+        }
+
+        private static void DeleteCurrentForm()
+        {
+            var form = MatchingForm(GetCurrentForm());
             if (form == null)
             {
-                MechabellumModding.Log.LogWarning($"Could not get current formation");
+                MechabellumModding.Log.LogWarning("Nothing to delete that matches this formation");
                 return;
             }
 
-            var baseData = form.GetBaseData();
-            idHighwater++;
-            baseData.name = idHighwater.ToString();
-            baseData.id = idHighwater;
-            baseData.userid = (ulong) idHighwater;
-            baseData.time = DateTime.Now.ToLongDateString() + ' ' + DateTime.Now.ToLongTimeString();
+            var dir = Path.Combine(Helpers.GameFolderPath, "custom_formations");
+            Directory.CreateDirectory(dir);
+            var filepath = Path.Combine(dir, $"{form.baseData.id}.json");
+            
+            if (File.Exists(filepath))
+            {
+                File.Delete(filepath);
+            }
 
-            LoadCustomForm(baseData, true);
-            ApplyForm(baseData);
+            var idx = -1;
+            for (int i = 0; i < forms.Count; i++)
+            {
+                if (form.baseData.id == forms[i].baseData.id)
+                {
+                    idx = i;
+                    break;
+                }
+            }
+
+            if (idx != -1)
+            {
+                forms.RemoveAt(idx);
+            }
+            else
+            {
+                MechabellumModding.Log.LogWarning("Failed to find and remove form from RAM");
+            }
+
+            RecommendFormManager.Instance?.dataInfo?.ClearCurrentRecommend();
+            RefreshRecPanel();
+            ApplyAll();
+            PendingSelect = true;
+
+            MechabellumModding.Log.LogInfo($"Deleted form id={form.baseData.id}");
         }
 
         private static FormCollect Base2Collect(FormBase form)
@@ -395,17 +469,24 @@ namespace MechabellumModding
             };
         }
 
-        private static bool DuplicateForm(FormBase x)
+        private static FormCollect MatchingForm(FormBase x)
         {
+            if (x == null) return null;
+
             foreach (var form in forms)
             {
                 if (FormEq(x, form.baseData))
                 {
-                    return true;
+                    return form;
                 }
             }
 
-            return false;
+            return null;
+        }
+
+        private static bool DuplicateForm(FormBase x)
+        {
+            return MatchingForm(x) != null;
         }
 
         private static void LoadCustomFormCallback(FormBase form)
@@ -420,20 +501,22 @@ namespace MechabellumModding
                 idHighwater = form.id;
             }
 
-            if (!DuplicateForm(form))
+            if (DuplicateForm(form))
             {
-                if (saveToDisk)
-                {                    
-                    var dir = Path.Combine(Helpers.GameFolderPath, "custom_formations");
-                    Directory.CreateDirectory(dir);
-
-                    var filepath = Path.Combine(dir, $"{form.id}.json");
-                    RecommendFormManager.Instance?.store?.SaveObjToJson(filepath, form);
-                    MechabellumModding.Log.LogInfo($"Saved to {filepath}");
-                }
-
-                forms.Add(Base2Collect(form));
+                return;
             }
+
+            if (saveToDisk)
+            {                    
+                var dir = Path.Combine(Helpers.GameFolderPath, "custom_formations");
+                Directory.CreateDirectory(dir);
+
+                var filepath = Path.Combine(dir, $"{form.id}.json");
+                RecommendFormManager.Instance?.store?.SaveObjToJson(filepath, form);
+                MechabellumModding.Log.LogInfo($"Saved to {filepath}");
+            }
+
+            forms.Add(Base2Collect(form));
         }
 
         private static void LoadCustomForms()
@@ -497,20 +580,7 @@ namespace MechabellumModding
         private static void RecommendFormPanel_Init(ref RecommendFormPanel __instance)
         {
             formPanel = __instance;
-
-            var currentForm = GetCurrentForm();
-            if (currentForm == null)
-            {
-                return;
-            }
-
-            foreach (var form in forms)
-            {
-                if (AreFormsCompatible(form.baseData, currentForm))
-                {
-                    ApplyForm(form);
-                }
-            }
+            ApplyAll();
         }
 
         private static RecommendFormManager formManager = null;
