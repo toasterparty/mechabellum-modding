@@ -33,7 +33,13 @@ namespace MechabellumModding
                 return;
             }
 
-            if (Input.GetKeyDown(KeyCode.Keypad1))
+            if (!MatchClient.IsRunning)
+            {
+                InDeploy = false;
+                FirstDeployFinished = false;
+            }
+
+            if (Input.GetKeyDown(KeyCode.Keypad1) || ShouldShowRecButton())
             {
                 ShowRecButton();
             }
@@ -53,7 +59,52 @@ namespace MechabellumModding
             }
         }
 
-        static bool DictionaryEqual<TKey, TValue>(Dictionary<TKey, TValue> dict1, Dictionary<TKey, TValue> dict2)
+        private static bool ShouldShowRecButton()
+        {
+            if (!IsFirstDeploy()) return false;
+            if (formPanel == null) return false;
+
+            return !formPanel.recommendBtn.IsShow() && !formPanel.chooseRecommendFormPanel.IsShow();
+        }
+
+        private static bool InDeploy = false;
+        private static bool FirstDeployFinished = false;
+        [HarmonyPatch(typeof(MatchClient), nameof(MatchClient.OnEnterDeploy))]
+        [HarmonyPostfix]
+        private static void OnEnterDeploy()
+        {
+            MechabellumModding.Log.LogInfo("OnEnterDeploy");
+            InDeploy = true;
+        }
+
+        [HarmonyPatch(typeof(MatchClient), nameof(MatchClient.OnFightStart))]
+        [HarmonyPrefix]
+        private static void OnFightStart()
+        {
+            MechabellumModding.Log.LogInfo("OnFightStart");
+            InDeploy = false;
+            FirstDeployFinished = true;
+        }
+
+        private static bool IsFirstDeploy()
+        {
+            if (!MatchClient.IsRunning)
+            {
+                return false;
+            }
+
+            var client = MatchClient.Current;
+            if (client == null) return false;
+
+            if (client.IsWatchMatch() || client.IsWatchMatch())
+            {
+                return false;
+            }
+
+            return InDeploy && !FirstDeployFinished;
+        }
+
+        private static bool DictionaryEqual<TKey, TValue>(Dictionary<TKey, TValue> dict1, Dictionary<TKey, TValue> dict2)
         {
             if (dict1.Count != dict2.Count)
             {
@@ -406,6 +457,8 @@ namespace MechabellumModding
             try
             {
                 var customFormationsDir = Path.Combine(Helpers.GameFolderPath, "custom_formations");
+                Directory.CreateDirectory(customFormationsDir);
+
                 string[] files = Directory.GetFiles(customFormationsDir);
 
                 foreach (string filePath in files)
@@ -468,7 +521,6 @@ namespace MechabellumModding
             MechabellumModding.Log.LogInfo("RecommendFormManager_Init");
             formManager = __instance;
             ClearForms();
-            ShowRecButton();
         }
     }
 }
