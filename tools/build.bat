@@ -12,6 +12,8 @@ if not exist %RELEASE_DIR% mkdir %RELEASE_DIR%
 
 cd %SRC_DIR% || exit 1
 
+taskkill /im "Mechabellum.exe"
+
 dotnet build
 
 xcopy %BUILD_DIR%\com.github.toasterparty.%PROJECT_NAME%.dll %DIST_DIR% /y /q || exit 1

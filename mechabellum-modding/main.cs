@@ -23,7 +23,7 @@ namespace MechabellumModding
 
             /* Check for early exit due to disable switch */
             ModConfig.Load();
-            if (ModConfig.data.disableAllMods)
+            if (ModConfig.Data.disableAllMods)
             {
                 Log.LogInfo($"All mods DISABLED!");
                 return;
@@ -34,7 +34,7 @@ namespace MechabellumModding
 
             /* Inject Mods */
             Harmony.CreateAndPatchAll(typeof(MechabellumModding));
-            ReccomendedFormations.Load();
+            RecommendedFormations.Load();
         }
     }
 
@@ -45,7 +45,7 @@ namespace MechabellumModding
         #pragma warning disable CA1822
         private void Update()
         {
-            
+            RecommendedFormations.Update();
         }
     }
 }

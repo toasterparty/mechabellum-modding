@@ -49,6 +49,8 @@ set PLUGINS_DIR="%~dp1\BepInEx\plugins"
 echo Installing 'Mechabellum Modding' into %PLUGINS_DIR%...
 echo.
 
+taskkill /im "Mechabellum.exe"
+
 if not exist %BEPINEX_DIR% mkdir %BEPINEX_DIR%
 if not exist %PLUGINS_DIR% mkdir %PLUGINS_DIR%
 
