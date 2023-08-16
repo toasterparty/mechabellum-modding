@@ -2,6 +2,16 @@
 
 An educational expedition to learn more about the game with no intention of providing unfair advantages. Should you feel something in this repository gives an unfair advantage, please reach out and I will take it down immediately.
 
+## Features
+
+- Custom Starting Formations
+    - Clears all default recommendations. The only one you will see are ones you create
+    - Recommendation panel includes buttons for adding and deleting recommendations
+    - Recommendation panel supports more than 3 formations now
+    - Automatically select a saved formation on match start
+    - Save custom formations to game folder (they can be shared very easily)
+    - Added keyboard shortcuts to quickly browse through your starting formations
+
 # How to Install
 
 ## Requirements
