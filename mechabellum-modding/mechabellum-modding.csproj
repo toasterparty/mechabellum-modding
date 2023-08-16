@@ -81,6 +81,16 @@
   </ItemGroup>
   <ItemGroup>
     <Reference Include="gamedll">
+      <HintPath>..\referencedlls\UnityEngine.IMGUIModule.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="gamedll">
+      <HintPath>..\referencedlls\UnityEngine.TextRenderingModule.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="gamedll">
       <HintPath>..\referencedlls\Il2Cppmscorlib.dll</HintPath>
     </Reference>
   </ItemGroup>

@@ -14,6 +14,7 @@ namespace MechabellumModding
         {
             public bool disableAllMods;
             public bool customRecommendedFormations;
+            public bool CustomRecommendedFormationKeyboardShortcuts;
         }
 
         public static ConfigData Data
@@ -41,9 +42,15 @@ namespace MechabellumModding
                 "General",
                 "CustomRecommendedFormations",
                 false,
-                "Replaces the community-provided Recommended starting formations with ones you create"
+                "Replaces the community-provided recommended starting formations with ones you create"
             ).Value;
 
+            data.CustomRecommendedFormationKeyboardShortcuts = configFile.Bind(
+                "General",
+                "CustomRecommendedFormationKeyboardShortcuts",
+                false,
+                "If custom starting formations are enabled, this setting allows you to browse and create formations with keyboard shortcuts. They are hard-coded as follows:\n - Page Up: Next Formation\n - Page Down: Previous Formation\n - Insert: Add Formation\n - Delete: Remove Formation"
+            ).Value;
         }
     }
 }

@@ -13,6 +13,103 @@ namespace MechabellumModding
         private static readonly List<FormCollect> forms = new();
         private static int currentFormIdx = 0;
         private static int idHighwater = 0;
+        private static bool PendingSelectNext = false;
+        private static bool PendingSelectPrev = false;
+        private static bool PendingAdd = false;
+        private static bool PendingDelete = false;
+        private static int CachedIndex = -1;
+        private static int CachedMaxIndex = -1;
+
+        private static void ResetCache()
+        {
+            CachedIndex = -1;
+            CachedMaxIndex = -1;
+        }
+
+        public static void SelectNext()
+        {
+            PendingSelectNext = true;
+        }
+
+        public static void SelectPrev()
+        {
+            PendingSelectPrev = true;
+        }
+
+        public static void Add()
+        {
+            PendingAdd = true;
+        }
+
+        public static void Delete()
+        {
+            PendingDelete = true;
+        }
+
+        public static RecommendFormPanel FormPanel
+        {
+            get
+            {
+                return formPanel;
+            }
+        }
+
+        public static int CurrentIndex
+        {
+            get
+            {
+                if (CachedIndex != -1)
+                {
+                    return CachedIndex;
+                }
+
+                var currentForm = GetCurrentForm();
+                if (currentForm == null) return -1;
+
+                var idx = 1;
+
+                for (int i = 0; i < forms.Count; i++)
+                {
+                    if (FormEq(currentForm, forms[i].baseData))
+                    {
+                        CachedIndex = idx;
+                        return idx;
+                    }
+                    else if(AreFormsCompatible(currentForm, forms[i].baseData))
+                    {
+                        idx++;
+                    }
+                }
+
+                return -1;
+            }
+        }
+
+        public static int MaxIndex
+        {
+            get
+            {
+                if (CachedMaxIndex != -1)
+                {
+                    return CachedMaxIndex;
+                }
+
+                var currentForm = GetCurrentForm();
+                if (currentForm == null) return 0;
+
+                int count = 0;
+                for (int i = 0; i < forms.Count; i++)
+                {
+                    if (AreFormsCompatible(currentForm, forms[i].baseData))
+                    {
+                        count++;
+                    }
+                }
+
+                CachedMaxIndex = count;
+                return count;
+            }
+        }
 
         public static void Load()
         {
@@ -22,11 +119,8 @@ namespace MechabellumModding
             }
 
             LoadCustomForms();
-
             Harmony.CreateAndPatchAll(typeof(RecommendedFormations));
         }
-
-        private static bool PendingSelect = false;
 
         public static void Update()
         {
@@ -46,10 +140,33 @@ namespace MechabellumModding
                 ShowRecButton();
             }
 
-            if (PendingSelect && formPanel != null && formPanel.ChooseRecommendFormPanel != null)
+            if (formPanel != null && formPanel.ChooseRecommendFormPanel != null)
             {
-                PendingSelect = false;
-                SelectNextForm();
+                if (PendingSelectNext)
+                {
+                    PendingSelectNext = false;
+                    SelectNextForm();
+                }
+                else if (PendingSelectPrev)
+                {
+                    PendingSelectPrev = false;
+                    SelectNextForm(false);
+                }
+                else if (PendingAdd)
+                {
+                    PendingAdd = false;
+                    SaveCurrentForm();
+                }
+                else if (PendingDelete)
+                {
+                    PendingDelete = false;
+                    DeleteCurrentForm();
+                }
+            }
+
+            if (!ModConfig.Data.CustomRecommendedFormationKeyboardShortcuts)
+            {
+                return;
             }
 
             if (Input.GetKeyDown(KeyCode.PageUp))
@@ -112,7 +229,7 @@ namespace MechabellumModding
 
             if (IsFirstDeploy())
             {
-                PendingSelect = true;
+                PendingSelectNext = true;
             }
         }
 
@@ -285,6 +402,7 @@ namespace MechabellumModding
 
             chooseFormPanel.OnClickForm(formItems[planIdx].itemBtn);
             RefreshRecPanel();
+            ResetCache();
             MechabellumModding.Log.LogWarning($"Applied plan {planIdx} id={form.id}");
         }
 
@@ -453,7 +571,8 @@ namespace MechabellumModding
             RecommendFormManager.Instance?.dataInfo?.ClearCurrentRecommend();
             RefreshRecPanel();
             ApplyAll();
-            PendingSelect = true;
+            ResetCache();
+            PendingSelectNext = true;
 
             MechabellumModding.Log.LogInfo($"Deleted form id={form.baseData.id}");
         }
@@ -517,6 +636,7 @@ namespace MechabellumModding
             }
 
             forms.Add(Base2Collect(form));
+            ResetCache();
         }
 
         private static void LoadCustomForms()
@@ -581,6 +701,16 @@ namespace MechabellumModding
         {
             formPanel = __instance;
             ApplyAll();
+        }
+
+        [HarmonyPatch(typeof(ChooseRecommendFormPanel), nameof(ChooseRecommendFormPanel.Show))]
+        [HarmonyPostfix]
+        private static void ChooseRecommendFormPanel_Show(ref ChooseRecommendFormPanel __instance)
+        {
+            foreach (var obj in __instance.planGameObjects)
+            {
+                obj.Hide();
+            }
         }
 
         private static RecommendFormManager formManager = null;

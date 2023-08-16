@@ -48,6 +48,11 @@ namespace MechabellumModding
         {
             RecommendedFormations.Update();
         }
+
+        private void OnGUI()
+        {
+            RecommendedFormationsGui.OnGUI();
+        }
         #pragma warning restore IDE0051
         #pragma warning restore CA1822
     }
