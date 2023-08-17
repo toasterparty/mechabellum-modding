@@ -227,9 +227,9 @@ namespace MechabellumModding
             MechabellumModding.Log.LogInfo("OnEnterDeploy");
             InDeploy = true;
 
-            if (IsFirstDeploy())
+            if (!FirstDeployFinished)
             {
-                PendingSelectNext = true;
+                SelectNext();
             }
         }
 
@@ -248,6 +248,16 @@ namespace MechabellumModding
             {
                 return false;
             }
+
+            var uis = GameObject.FindObjectsOfType<MainUI>();
+            MainUI ui = null;
+            foreach (var _ui in uis) 
+            {
+                if (_ui.match == null) continue;
+                ui = _ui;
+                break;
+            }
+            if (!(ui?.FinishDeploymentButton?.IsShow() ?? false)) return false;
 
             var client = MatchClient.Current;
             if (client == null) return false;
@@ -408,6 +418,8 @@ namespace MechabellumModding
 
         private static void SelectNextForm(bool direction = true)
         {
+            if (!IsFirstDeploy()) return;
+
             var currentForm = GetCurrentForm();
             if (currentForm == null) return;
 
@@ -512,6 +524,8 @@ namespace MechabellumModding
 
         private static void SaveCurrentForm()
         {
+            if (!IsFirstDeploy()) return;
+
             var form = GetCurrentForm();
             if (form == null) return;
 
@@ -533,6 +547,8 @@ namespace MechabellumModding
 
         private static void DeleteCurrentForm()
         {
+            if (!IsFirstDeploy()) return;
+
             var form = MatchingForm(GetCurrentForm());
             if (form == null)
             {
