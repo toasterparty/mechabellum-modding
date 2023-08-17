@@ -4,16 +4,24 @@ An educational expedition to learn more about the game with no intention of prov
 
 ## Features
 
-### Custom Starting Formations
+#### Custom Starting Formations
 - Clears all default recommendations. The only one you will see are ones you create
 - Recommendation panel includes buttons for adding and deleting recommendations
 - Recommendation panel supports more than 3 formations now
 - Automatically select a saved formation on match start
 - Save custom formations to game folder (they can be shared very easily)
 - Added keyboard shortcuts to quickly manage starting formations:
-    - `Page Up`/`Page Down` - Browse saved formations
-    - `Insert` - Save current formation
-    - `Delete` - Remove current formation
+
+| Keybind     | Description               |
+|-------------|---------------------------|
+| Page Up     | Select next formation     |
+| Page Down   | Select previous formation |
+| Insert      | Save current formation    |
+| Delete      | Remove current formation  |
+
+#### Remove Camera Tooltop
+
+- Hides the tutorial text that is otherwise permanently in the bottom left corner of the match screen
 
 # How to Install
 

@@ -35,6 +35,7 @@ namespace MechabellumModding
             /* Inject Mods */
             Harmony.CreateAndPatchAll(typeof(MechabellumModding));
             RecommendedFormations.Load();
+            RemoveCameraTooltip.Load();
         }
     }
 

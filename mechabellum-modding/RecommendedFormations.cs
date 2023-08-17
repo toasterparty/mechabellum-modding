@@ -249,15 +249,10 @@ namespace MechabellumModding
                 return false;
             }
 
-            var uis = GameObject.FindObjectsOfType<MainUI>();
-            MainUI ui = null;
-            foreach (var _ui in uis) 
+            if (!(Helpers.MainUI?.FinishDeploymentButton?.IsShow() ?? false))
             {
-                if (_ui.match == null) continue;
-                ui = _ui;
-                break;
+                return false;
             }
-            if (!(ui?.FinishDeploymentButton?.IsShow() ?? false)) return false;
 
             var client = MatchClient.Current;
             if (client == null) return false;
