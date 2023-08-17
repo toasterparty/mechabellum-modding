@@ -50,7 +50,7 @@ namespace MechabellumModding
                 "CustomFormations",
                 "Enabled",
                 false,
-                "Replaces the community-provided recommended starting formations with ones you create"
+                "Replaces the community-provided recommended starting formations with ones you create. Formations created in this way are saved in `/<path-to-game>/Mechabellum/custom_formations/`"
             ).Value;
 
             data.CustomRecommendedFormationKeyboardShortcuts = configFile.Bind(
