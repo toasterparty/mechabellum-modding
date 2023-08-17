@@ -2,7 +2,7 @@
 
 An educational expedition to learn more about the game with no intention of providing unfair advantages. Should you feel something in this repository gives an unfair advantage, please reach out and I will take it down immediately.
 
-## Features
+# Features
 
 #### Custom Starting Formations
 - Clears all default recommendations. The only one you will see are ones you create
@@ -25,11 +25,11 @@ An educational expedition to learn more about the game with no intention of prov
 
 # How to Install
 
-## Requirements
+#### Requirements
 
 - Windows 10 or above
 
-## Instructions
+#### Instructions
 
 1. Download and extract the [Latest Release](https://github.com/toasterparty/mechabellum-modding/releases)
 
